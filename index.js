@@ -5,7 +5,11 @@ const bodyParser = require('body-parser');
 require('dotenv').config();
 
 const app = express();
-app.use(cors());
+const corsOptions = {
+    origin: process.env.FRONT_END_URL, 
+    optionsSuccessStatus: 200 // Para navegadores mais antigos
+};
+app.use(cors(corsOptions));
 app.use(bodyParser.json());
 
 const transporter = nodemailer.createTransport({
