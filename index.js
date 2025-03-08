@@ -7,10 +7,11 @@ require('dotenv').config();
 const app = express();
 const corsOptions = {
     origin: process.env.FRONT_END_URL, 
+    methods: ['GET', 'POST'],
     optionsSuccessStatus: 200 // Para navegadores mais antigos
 };
 app.use(cors(corsOptions));
-app.use(bodyParser.json());
+app.use(express.json());
 
 const transporter = nodemailer.createTransport({
     service: 'gmail',
