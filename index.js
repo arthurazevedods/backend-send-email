@@ -8,7 +8,7 @@ const app = express();
 const corsOptions = {
     origin: process.env.FRONT_END_URL, 
     methods: ['GET', 'POST'],
-    optionsSuccessStatus: 200 // Para navegadores mais antigos
+    optionsSuccessStatus: 200 
 };
 app.use(cors(corsOptions));
 app.use(express.json());
