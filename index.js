@@ -10,6 +10,7 @@ const app = express();
 const corsOptions = {
     origin: process.env.FRONT_END_URL, // URL do frontend
     methods: ['GET', 'POST'],
+    credentials: true,
     optionsSuccessStatus: 200, // Para navegadores mais antigos
 };
 app.use(cors(corsOptions));
