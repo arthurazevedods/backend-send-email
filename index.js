@@ -5,28 +5,32 @@ const bodyParser = require('body-parser');
 require('dotenv').config();
 
 const app = express();
+
+// Configuração do CORS
 const corsOptions = {
-    origin: process.env.FRONT_END_URL, 
+    origin: process.env.FRONT_END_URL, // URL do frontend
     methods: ['GET', 'POST'],
-    optionsSuccessStatus: 200 
+    optionsSuccessStatus: 200, // Para navegadores mais antigos
 };
 app.use(cors(corsOptions));
-app.use(express.json());
+app.use(bodyParser.json());
 
+// Configuração do Nodemailer
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
+        user: process.env.EMAIL_USER, // E-mail do remetente
+        pass: process.env.EMAIL_PASS, // Senha do remetente
     },
 });
 
+// Rota para enviar e-mail
 app.post('/send-email', (req, res) => {
     const { name, email, phone, message } = req.body;
 
     const mailOptions = {
         from: process.env.EMAIL_USER,
-        to: process.env.EMAIL_USER, 
+        to: process.env.EMAIL_USER, // E-mail do destinatário
         subject: 'Novo contato do formulário',
         text: `
             Nome: ${name}
@@ -44,6 +48,7 @@ app.post('/send-email', (req, res) => {
     });
 });
 
+// Inicia o servidor
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}`);
