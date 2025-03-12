@@ -8,7 +8,7 @@ const app = express();
 
 // Configuração do CORS
 const corsOptions = {
-    origin: process.env.FRONT_END_URL, // URL do frontend
+    origin: process.env.FRONT_END_URL || "https://arthurazevedods.vercel.app/", // URL do frontend
     methods: ['GET', 'POST'],
     credentials: true,
     optionsSuccessStatus: 200, // Para navegadores mais antigos
