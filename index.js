@@ -5,25 +5,21 @@ const bodyParser = require('body-parser');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const { body, validationResult } = require('express-validator');
-const morgan = require('morgan');
 require('dotenv').config();
 
 const app = express();
 
 // Configuração do CORS
 const corsOptions = {
-    origin: process.env.FRONT_END_URL || "http://localhost:5173", 
+    origin: process.env.FRONT_END_URL || "http://localhost:5173",
     methods: ['GET', 'POST'],
     credentials: true,
-    optionsSuccessStatus: 200, // Para navegadores mais antigos
+    optionsSuccessStatus: 200,
 };
 app.use(cors(corsOptions));
 
 // Segurança adicional com Helmet
 app.use(helmet());
-
-// Logging
-app.use(morgan('combined'));
 
 // Limite de taxa para evitar ataques de força bruta
 const limiter = rateLimit({
@@ -52,6 +48,7 @@ app.post('/send-email', [
 ], (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+        console.error('Erro de validação:', errors.array());
         return res.status(400).json({ success: false, errors: errors.array() });
     }
 
@@ -71,15 +68,17 @@ app.post('/send-email', [
 
     transporter.sendMail(mailOptions, (error, info) => {
         if (error) {
+            console.error('Erro ao enviar e-mail:', error);
             return res.status(500).json({ success: false, error: error.toString() });
         }
+        console.log('E-mail enviado com sucesso:', info.response);
         res.status(200).json({ success: true, message: 'E-mail enviado com sucesso!' });
     });
 });
 
 // Middleware de tratamento de erros global
 app.use((err, req, res, next) => {
-    console.error(err.stack);
+    console.error('Erro global:', err.stack);
     res.status(500).json({ success: false, error: 'Algo deu errado!' });
 });
 
