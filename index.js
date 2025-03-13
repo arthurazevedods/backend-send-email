@@ -2,18 +2,36 @@ const express = require('express');
 const nodemailer = require('nodemailer');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const { body, validationResult } = require('express-validator');
+const morgan = require('morgan');
 require('dotenv').config();
 
 const app = express();
 
 // Configuração do CORS
 const corsOptions = {
-    origin: process.env.FRONT_END_URL || "https://arthurazevedods.vercel.app/", // URL do frontend
+    origin: process.env.FRONT_END_URL || "http://localhost:5173", 
     methods: ['GET', 'POST'],
     credentials: true,
     optionsSuccessStatus: 200, // Para navegadores mais antigos
 };
 app.use(cors(corsOptions));
+
+// Segurança adicional com Helmet
+app.use(helmet());
+
+// Logging
+app.use(morgan('combined'));
+
+// Limite de taxa para evitar ataques de força bruta
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutos
+    max: 100, // Limite de 100 requisições por IP
+});
+app.use(limiter);
+
 app.use(bodyParser.json());
 
 // Configuração do Nodemailer
@@ -26,7 +44,17 @@ const transporter = nodemailer.createTransport({
 });
 
 // Rota para enviar e-mail
-app.post('/send-email', (req, res) => {
+app.post('/send-email', [
+    body('name').notEmpty().withMessage('Nome é obrigatório'),
+    body('email').isEmail().withMessage('E-mail inválido'),
+    body('phone').notEmpty().withMessage('Telefone é obrigatório'),
+    body('message').notEmpty().withMessage('Mensagem é obrigatória'),
+], (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ success: false, errors: errors.array() });
+    }
+
     const { name, email, phone, message } = req.body;
 
     const mailOptions = {
@@ -47,6 +75,12 @@ app.post('/send-email', (req, res) => {
         }
         res.status(200).json({ success: true, message: 'E-mail enviado com sucesso!' });
     });
+});
+
+// Middleware de tratamento de erros global
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ success: false, error: 'Algo deu errado!' });
 });
 
 // Inicia o servidor
