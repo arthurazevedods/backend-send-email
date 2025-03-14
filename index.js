@@ -10,13 +10,24 @@ require('dotenv').config();
 const app = express();
 
 // Configuração do CORS
+const allowedOrigins = ['https://arthurazevedods.vercel.app', 'http://localhost:5173'];
+
 const corsOptions = {
-    origin: process.env.FRONT_END_URL,
+    origin: (origin, callback) => {
+        if (allowedOrigins.includes(origin) || !origin) {
+            callback(null, true);
+        } else {
+            callback(new Error('Origem não permitida pelo CORS'));
+        }
+    },
     methods: ['GET', 'POST'],
     credentials: true,
     optionsSuccessStatus: 200,
 };
 app.use(cors(corsOptions));
+
+// Suporte a requisições OPTIONS
+app.options('*', cors(corsOptions));
 
 // Segurança adicional com Helmet
 app.use(helmet());
@@ -36,6 +47,9 @@ const transporter = nodemailer.createTransport({
     auth: {
         user: process.env.EMAIL_USER, // E-mail do remetente
         pass: process.env.EMAIL_PASS, // Senha do remetente
+    },
+    tls: {
+        rejectUnauthorized: false, // Ignora erros de certificado SSL
     },
 });
 
