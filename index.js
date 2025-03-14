@@ -11,7 +11,7 @@ const app = express();
 
 // Configuração do CORS
 const corsOptions = {
-    origin: process.env.FRONT_END_URL || "http://localhost:5173",
+    origin: process.env.FRONT_END_URL,
     methods: ['GET', 'POST'],
     credentials: true,
     optionsSuccessStatus: 200,
